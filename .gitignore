@@ -1,0 +1,4 @@
+*.DS_Store
+venv
+data
+dataset_preparation/TEMP_snirf.snirf
