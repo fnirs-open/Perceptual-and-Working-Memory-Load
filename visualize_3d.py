@@ -1,35 +1,38 @@
-import os
 import matplotlib.pyplot as plt
 import mne
-import mne_bids
 import mne_nirs
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
-# https://mne.tools/mne-nirs/dev/generated/mne_nirs.visualisation.plot_nirs_source_detector.html
-# One value should be specified per channel in the same order as info.chs.
+# Setup
+mne.viz.set_browser_backend("qt")
+subjects_dir = str(mne.datasets.sample.data_path()) + "/subjects"
+mne.datasets.fetch_fsaverage(subjects_dir=subjects_dir)
+mne.set_config("MNE_NIRS_FOLD_PATH", "data/fOLD-public/Supplementary")
 
 # Fetch anatomical labels
 mne.datasets.fetch_hcp_mmp_parcellation(subjects_dir=subjects_dir, accept=True)
-labels_combined = mne.read_labels_from_annot('fsaverage', 'PALS_B12_Brodmann', 'both', subjects_dir=subjects_dir)
+labels_combined = mne.read_labels_from_annot(
+    "fsaverage", "PALS_B12_Brodmann", "both", subjects_dir=subjects_dir
+)
+
+ch_model_df_hbo = pd.read_csv("data/cha_model_df_hbo.csv", index_col=0)
+raw_haemo_long = mne.io.read_raw_fif("data/raw.fif")
+
+# Visualize channel-level betas on montage
+# https://mne.tools/mne-nirs/dev/generated/mne_nirs.visualisation.plot_nirs_source_detector.html
+# One value should be specified per channel in the same order as info.chs.
 
 # Get correct order for channel values
 hbo_idx = mne.pick_types(raw_haemo_long.info, fnirs="hbo")
 info_hbo = mne.pick_info(raw_haemo_long.info, hbo_idx)
 
 # Plot each condition
-conditions = ['HighPL-HighWM', 'HighPL-LowWM', 'LowPL-HighWM', 'LowPL-LowWM']
-#conditions = ['HighPL-HighWM']
+conditions = ["HighPL-HighWM", "HighPL-LowWM", "LowPL-HighWM", "LowPL-LowWM"]
 for cond in conditions:
-
     print(f"\nVisualizing condition {cond}\n")
 
-    stats_cond = (
-        ch_model_df_hbo
-        .query(f"Condition == '{cond}'")
-        .copy()
-    )
+    stats_cond = ch_model_df_hbo.query(f"Condition == '{cond}'").copy()
 
     # Order stats according to info channel order
     stats_cond["channel_clean"] = stats_cond["ch_name"].str.split(":").str[0]
@@ -51,14 +54,14 @@ for cond in conditions:
     colors = cmap(norm(values))
 
     # Set up colors for cortex projection
-    clim = dict(kind="value", lims=[-vmax, 0, vmax])
+    clim = dict(kind="value", pos_lims=[0, 3, 5])
 
     # Plot the projection
     brain = mne_nirs.visualisation.plot_glm_surface_projection(
         raw_haemo_long.copy().pick("hbo"),
         stats_cond,
         colorbar=True,
-        #clim=clim,
+        clim=clim,
     )
 
     # Add montage
@@ -66,41 +69,38 @@ for cond in conditions:
         info_hbo,
         trans="fsaverage",
         fnirs=["channels", "pairs"],
-        sensor_colors = colors,
+        sensor_colors=colors,
     )
 
-    # Dorsolateral prefrontal
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.9-lh'][0]
-    brain.add_label(vis_label, borders=True, color='purple')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.9-rh'][0]
-    brain.add_label(vis_label, borders=True, color='purple')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.46-lh'][0]
-    brain.add_label(vis_label, borders=True, color='purple')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.46-rh'][0]
-    brain.add_label(vis_label, borders=True, color='purple')
+    # Orbitofrontal
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.10-lh"][
+        0
+    ]
+    brain.add_label(vis_label, borders=True, color="red")
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.10-rh"][
+        0
+    ]
+    brain.add_label(vis_label, borders=True, color="red")
 
-    # Frontopolar
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.10-lh'][0]
-    brain.add_label(vis_label, borders=True, color='red')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.10-rh'][0]
-    brain.add_label(vis_label, borders=True, color='red')
-
-    # FEF
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.8-lh'][0]
-    brain.add_label(vis_label, borders=True, color='cyan')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.8-rh'][0]
-    brain.add_label(vis_label, borders=True, color='cyan')
-
-    # IFG
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.44-lh'][0]
-    brain.add_label(vis_label, borders=True, color='green')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.44-rh'][0]
-    brain.add_label(vis_label, borders=True, color='green')
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.11-lh"][
+        0
+    ]
+    brain.add_label(vis_label, borders=True, color="green")
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.11-rh"][
+        0
+    ]
+    brain.add_label(vis_label, borders=True, color="green")
 
     # Premotor and SMA
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.6-lh'][0]
-    brain.add_label(vis_label, borders=True, color='blue')
-    vis_label = [label for label in labels_combined if label.name == 'Brodmann.6-rh'][0]
-    brain.add_label(vis_label, borders=True, color='blue')
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.6-lh"][0]
+    brain.add_label(vis_label, borders=True, color="blue")
+    vis_label = [label for label in labels_combined if label.name == "Brodmann.6-rh"][0]
+    brain.add_label(vis_label, borders=True, color="blue")
 
-    print(stats_cond[stats_cond["Significant"] == True][["ch_name", "Coef.", "Significant", "P>|z|"]])
+    print(
+        stats_cond[stats_cond["Significant"] == True][
+            ["ch_name", "Coef.", "Significant", "P>|z|"]
+        ]
+    )
+
+    input("ENTER to continue")

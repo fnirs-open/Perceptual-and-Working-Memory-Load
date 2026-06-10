@@ -20,7 +20,7 @@ pip install -r requirements.txt
 Currently using a forked version of mne-nirs, supporting saving auxilliary data (such as accelerometer data) to BIDS datasets, as well as implementing TCCA.
 
 ~~~
-git clone https://github.com/nirx/fOLD-public.git
+git clone https://github.com/alkvi/mne-nirs.git
 cd mne-nirs
 git checkout dev
 pip install -e .
