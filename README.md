@@ -14,7 +14,7 @@ Analysis was run with Python 3.14.2
 ~~~
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements_max.txt
 ~~~
 
 Currently using a forked version of mne-nirs, supporting saving auxilliary data (such as accelerometer data) to BIDS datasets, as well as implementing TCCA.
