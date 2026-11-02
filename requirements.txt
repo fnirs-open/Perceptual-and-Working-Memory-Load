@@ -76,7 +76,6 @@ mdurl==0.1.2
 mistune==3.2.1
 mne==1.12.1
 mne-bids==0.18.0
--e git+ssh://git@github.com/alkvi/mne-nirs.git@df10abdfdabf78f4df7c0c6d4f239bb8c4bb79bc#egg=mne_nirs
 mne-qt-browser==0.7.5
 more-itertools==11.0.2
 msgpack==1.1.2
