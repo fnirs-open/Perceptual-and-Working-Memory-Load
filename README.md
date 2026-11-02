@@ -56,7 +56,7 @@ uv pip install -r requirements.txt
 Windows:
 
 ~~~
-uv venv --python 3.11
+uv venv --python 3.14.2
 .venv\Scripts\Activate.ps1
 uv pip install -r requirements.txt
 ~~~
